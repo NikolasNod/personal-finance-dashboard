@@ -7,6 +7,8 @@ const pool = require("../db");
 
 const router = express.Router();
 
+const authMiddleware = require("../middleware/auth.middleware");
+
 router.post("/login", async (req, res) => {
     const result = registerSchema.safeParse(req.body);
 
@@ -120,6 +122,13 @@ router.post("/register", async (req, res) => {
             message: "Internal server error"
         });
     }
+});
+
+router.get("/me", authMiddleware, (req, res) => {
+    res.json({
+        message: "You are authenticated",
+        userId: req.user.id
+    });
 });
 
 module.exports = router;
