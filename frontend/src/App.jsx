@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
+import Transactions from "./pages/Transactions";
 
 function App() {
     return (
@@ -9,7 +11,7 @@ function App() {
 
                 <Route
                     path="/dashboard"
-                    element={<h1>Dashboard</h1>}
+                    element={<Dashboard />}
                 />
 
                 <Route
