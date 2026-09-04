@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import api from "../services/api";
+import "./Login.css";
 
 function Login() {
     const navigate = useNavigate();
@@ -25,10 +26,12 @@ function Login() {
             localStorage.setItem("token", response.data.token);
 
             navigate("/dashboard");
-
         } catch (error) {
             if (error.response) {
-                setError(error.response.data.message);
+                setError(
+                    error.response.data.message ||
+                    "Invalid email or password"
+                );
             } else {
                 setError("Unable to connect to the server");
             }
@@ -38,36 +41,112 @@ function Login() {
     };
 
     return (
-        <div>
-            <h1>Login</h1>
+        <div className="login-page">
 
-            <form onSubmit={handleSubmit}>
-                <div>
-                    <label>Email</label>
-                    <input
-                        type="email"
-                        value={email}
-                        onChange={(event) => setEmail(event.target.value)}
-                        required
-                    />
+            <div className="login-container">
+
+                <div className="login-brand">
+                    <div className="brand-icon">
+                        €
+                    </div>
+
+                    <h1>Personal Finance</h1>
+
+                    <p>
+                        Manage your money smarter.
+                    </p>
                 </div>
 
-                <div>
-                    <label>Password</label>
-                    <input
-                        type="password"
-                        value={password}
-                        onChange={(event) => setPassword(event.target.value)}
-                        required
-                    />
+                <div className="login-card">
+
+                    <div className="login-header">
+                        <h2>Welcome back</h2>
+
+                        <p>
+                            Sign in to access your dashboard
+                        </p>
+                    </div>
+
+                    <form
+                        className="login-form"
+                        onSubmit={handleSubmit}
+                    >
+
+                        <div className="form-group">
+                            <label htmlFor="email">
+                                Email
+                            </label>
+
+                            <input
+                                id="email"
+                                type="email"
+                                placeholder="you@example.com"
+                                value={email}
+                                onChange={(event) =>
+                                    setEmail(event.target.value)
+                                }
+                                required
+                                autoComplete="email"
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label htmlFor="password">
+                                Password
+                            </label>
+
+                            <input
+                                id="password"
+                                type="password"
+                                placeholder="Enter your password"
+                                value={password}
+                                onChange={(event) =>
+                                    setPassword(event.target.value)
+                                }
+                                required
+                                autoComplete="current-password"
+                            />
+                        </div>
+
+                        {error && (
+                            <div className="login-error">
+                                {error}
+                            </div>
+                        )}
+
+                        <button
+                            className="login-button"
+                            type="submit"
+                            disabled={loading}
+                        >
+                            {loading ? (
+                                <>
+                                    <span className="spinner"></span>
+                                    Logging in...
+                                </>
+                            ) : (
+                                "Login"
+                            )}
+                        </button>
+
+                    </form>
+
+                    <div className="login-footer">
+                        <span>Don't have an account?</span>
+
+                        <Link to="/register">
+                            Create an account
+                        </Link>
+                    </div>
+
                 </div>
 
-                {error && <p>{error}</p>}
+                <p className="login-copyright">
+                    Personal Finance Dashboard
+                </p>
 
-                <button type="submit" disabled={loading}>
-                    {loading ? "Logging in..." : "Login"}
-                </button>
-            </form>
+            </div>
+
         </div>
     );
 }

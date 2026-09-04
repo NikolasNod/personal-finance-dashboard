@@ -79,16 +79,19 @@ router.get("/", authMiddleware, async (req, res) => {
     try {
         const result = await pool.query(
             `SELECT
-                id,
-                category_id,
-                amount,
-                type,
-                description,
-                date,
-                created_at
-            FROM TRANSACTIONS
-            WHERE user_id = $1
-            ORDER BY date DESC, created_at DESC`,
+                t.id,
+                t.category_id,
+                c.name AS category,
+                t.amount,
+                t.type,
+                t.description,
+                t.date,
+                t.created_at
+            FROM transactions t
+            JOIN categories c
+                ON c.id = t.category_id
+            WHERE t.user_id = $1
+            ORDER BY t.date DESC, t.created_at DESC`,
             [userId]
         );
 

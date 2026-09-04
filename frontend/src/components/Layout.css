@@ -1,0 +1,91 @@
+.app-layout {
+    min-height: 100vh;
+    background: #f5f7fb;
+}
+
+.topbar {
+    height: 64px;
+    background: white;
+    border-bottom: 1px solid #e5e7eb;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 28px;
+}
+
+.logo {
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.logout-button {
+    border: none;
+    background: #ef4444;
+    color: white;
+
+    padding: 8px 16px;
+    border-radius: 6px;
+
+    cursor: pointer;
+}
+
+.app-body {
+    display: flex;
+    min-height: calc(100vh - 64px);
+}
+
+.sidebar {
+    width: 220px;
+    background: #111827;
+    padding: 24px 14px;
+}
+
+.nav-link {
+    display: block;
+
+    padding: 12px 14px;
+    margin-bottom: 6px;
+
+    border-radius: 6px;
+
+    color: #d1d5db;
+    text-decoration: none;
+}
+
+.nav-link:hover {
+    background: #1f2937;
+    color: white;
+}
+
+.nav-link.active {
+    background: #374151;
+    color: white;
+}
+
+.main-content {
+    flex: 1;
+    padding: 32px;
+    min-width: 0;
+}
+
+@media (max-width: 700px) {
+    .app-body {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: auto;
+        padding: 10px;
+    }
+
+    .nav-link {
+        display: inline-block;
+        margin-right: 5px;
+    }
+
+    .main-content {
+        padding: 16px;
+    }
+}

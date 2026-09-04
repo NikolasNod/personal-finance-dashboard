@@ -5,23 +5,18 @@ import {
     Cell,
     Tooltip,
     Legend,
+    ResponsiveContainer,
     BarChart,
     Bar,
     XAxis,
     YAxis,
     CartesianGrid
 } from "recharts";
+
 import api from "../services/api";
 import "./Dashboard.css";
-import { useNavigate } from "react-router-dom";
 
 function Dashboard() {
-    const navigate = useNavigate();
-    const handleLogout = () => {
-        localStorage.removeItem("token");
-        navigate("/login");
-    };
-
     const [summary, setSummary] = useState(null);
     const [recentTransactions, setRecentTransactions] = useState([]);
     const [categoryData, setCategoryData] = useState([]);
@@ -43,21 +38,28 @@ function Dashboard() {
                     api.get("/dashboard/monthly")
                 ]);
 
-                setSummary(summaryResponse.data);
+                const summaryData = summaryResponse.data;
+
+                setSummary({
+                    ...summaryData,
+                    balance: Number(summaryData.balance),
+                    totalIncome: Number(summaryData.totalIncome),
+                    totalExpenses: Number(summaryData.totalExpenses)
+                });
 
                 setRecentTransactions(
-                    transactionsResponse.data.transactions
+                    transactionsResponse.data.transactions || []
                 );
 
                 setCategoryData(
-                    categoryResponse.data.categories.map((item) => ({
+                    (categoryResponse.data.categories || []).map((item) => ({
                         ...item,
                         total: Number(item.total)
                     }))
                 );
 
                 setMonthlyData(
-                    monthlyResponse.data.monthly.map((item) => ({
+                    (monthlyResponse.data.monthly || []).map((item) => ({
                         ...item,
                         income: Number(item.income),
                         expenses: Number(item.expenses)
@@ -68,7 +70,10 @@ function Dashboard() {
                 console.error("DASHBOARD ERROR:", error);
 
                 if (error.response) {
-                    setError(error.response.data.message);
+                    setError(
+                        error.response.data.message ||
+                        "Failed to load dashboard"
+                    );
                 } else {
                     setError("Unable to connect to the server");
                 }
@@ -79,78 +84,143 @@ function Dashboard() {
     }, []);
 
     if (error) {
-        return <p>{error}</p>;
+        return (
+            <div className="dashboard-error">
+                <div className="error-icon">!</div>
+                <h2>Something went wrong</h2>
+                <p>{error}</p>
+            </div>
+        );
     }
 
     if (!summary) {
-        return <p>Loading dashboard...</p>;
+        return (
+            <div className="dashboard-loading">
+                <div className="loading-spinner"></div>
+                <p>Loading your finances...</p>
+            </div>
+        );
     }
 
     return (
-        <div className="dashboard">
+        <div className="dashboard-page">
 
-            <header className="dashboard-header">
-                <h1>Personal Finance</h1>
+            <div className="dashboard-heading">
+                <div>
+                    <p className="eyebrow">OVERVIEW</p>
+                    <h1>Dashboard</h1>
+                    <p className="dashboard-subtitle">
+                        Here's what's happening with your finances.
+                    </p>
+                </div>
+            </div>
 
-                <button
-                    className="logout-button"
-                    onClick={handleLogout}
-                >
-                    Logout
-                </button>
-            </header>
+            {/* Summary cards */}
+            <div className="summary-grid">
 
-            <div className="dashboard-layout">
+                <div className="summary-card balance-card">
+                    <div className="summary-card-top">
+                        <div>
+                            <span className="summary-label">
+                                Total Balance
+                            </span>
 
-                <aside className="sidebar">
-                    <a href="/dashboard">Dashboard</a>
-                    <a href="#">Transactions</a>
-                    <a href="#">Categories</a>
-                </aside>
-
-                <main className="dashboard-content">
-
-                    <div className="summary-grid">
-
-                        <div className="summary-card">
-                            <h2>Balance</h2>
-                            <p>
+                            <h2>
                                 €{summary.balance.toFixed(2)}
-                            </p>
+                            </h2>
                         </div>
 
-                        <div className="summary-card">
-                            <h2>Income</h2>
-                            <p>
-                                €{summary.totalIncome.toFixed(2)}
-                            </p>
+                        <div className="summary-icon balance-icon">
+                            €
                         </div>
-
-                        <div className="summary-card">
-                            <h2>Expenses</h2>
-                            <p>
-                                €{summary.totalExpenses.toFixed(2)}
-                            </p>
-                        </div>
-
                     </div>
 
-                    <div className="charts-grid">
+                    <div className="summary-footer">
+                        <span className="status-dot"></span>
+                        Current balance
+                    </div>
+                </div>
 
-                        <div className="dashboard-card">
+                <div className="summary-card">
+                    <div className="summary-card-top">
+                        <div>
+                            <span className="summary-label">
+                                Total Income
+                            </span>
+
+                            <h2>
+                                €{summary.totalIncome.toFixed(2)}
+                            </h2>
+                        </div>
+
+                        <div className="summary-icon income-icon">
+                            ↗
+                        </div>
+                    </div>
+
+                    <div className="summary-footer income-text">
+                        Money coming in
+                    </div>
+                </div>
+
+                <div className="summary-card">
+                    <div className="summary-card-top">
+                        <div>
+                            <span className="summary-label">
+                                Total Expenses
+                            </span>
+
+                            <h2>
+                                €{summary.totalExpenses.toFixed(2)}
+                            </h2>
+                        </div>
+
+                        <div className="summary-icon expense-icon">
+                            ↘
+                        </div>
+                    </div>
+
+                    <div className="summary-footer expense-text">
+                        Money going out
+                    </div>
+                </div>
+
+            </div>
+
+            {/* Charts */}
+            <div className="charts-grid">
+
+                <div className="dashboard-card category-card">
+                    <div className="card-header">
+                        <div>
+                            <p className="card-eyebrow">
+                                BREAKDOWN
+                            </p>
                             <h2>Expenses by Category</h2>
+                        </div>
+                    </div>
 
-                            {categoryData.length === 0 ? (
-                                <p>No expense data yet.</p>
-                            ) : (
-                                <PieChart width={450} height={300}>
+                    {categoryData.length === 0 ? (
+                        <div className="empty-chart">
+                            <div className="empty-icon">◌</div>
+                            <p>No expense data yet</p>
+                            <span>
+                                Add some expenses to see your breakdown.
+                            </span>
+                        </div>
+                    ) : (
+                        <div className="chart-container pie-container">
+                            <ResponsiveContainer width="100%" height={320}>
+                                <PieChart>
                                     <Pie
                                         data={categoryData}
                                         dataKey="total"
                                         nameKey="category"
                                         cx="50%"
                                         cy="50%"
-                                        outerRadius={100}
+                                        innerRadius={70}
+                                        outerRadius={105}
+                                        paddingAngle={3}
                                         label
                                     >
                                         {categoryData.map(
@@ -162,89 +232,193 @@ function Dashboard() {
                                         )}
                                     </Pie>
 
-                                    <Tooltip />
-                                    <Legend />
+                                    <Tooltip
+                                        formatter={(value) =>
+                                            `€${Number(value).toFixed(2)}`
+                                        }
+                                    />
+
+                                    <Legend
+                                        verticalAlign="bottom"
+                                        height={36}
+                                    />
                                 </PieChart>
-                            )}
+                            </ResponsiveContainer>
                         </div>
+                    )}
+                </div>
 
-                        <div className="dashboard-card">
+                <div className="dashboard-card monthly-card">
+                    <div className="card-header">
+                        <div>
+                            <p className="card-eyebrow">
+                                TRENDS
+                            </p>
                             <h2>Monthly Overview</h2>
+                        </div>
+                    </div>
 
-                            {monthlyData.length === 0 ? (
-                                <p>No monthly data yet.</p>
-                            ) : (
+                    {monthlyData.length === 0 ? (
+                        <div className="empty-chart">
+                            <div className="empty-icon">◌</div>
+                            <p>No monthly data yet</p>
+                            <span>
+                                Your monthly activity will appear here.
+                            </span>
+                        </div>
+                    ) : (
+                        <div className="chart-container">
+                            <ResponsiveContainer width="100%" height={320}>
                                 <BarChart
-                                    width={600}
-                                    height={300}
                                     data={monthlyData}
+                                    margin={{
+                                        top: 10,
+                                        right: 10,
+                                        left: 0,
+                                        bottom: 5
+                                    }}
                                 >
                                     <CartesianGrid
                                         strokeDasharray="3 3"
+                                        vertical={false}
                                     />
 
-                                    <XAxis dataKey="month" />
+                                    <XAxis
+                                        dataKey="month"
+                                        tickLine={false}
+                                        axisLine={false}
+                                    />
 
-                                    <YAxis />
+                                    <YAxis
+                                        tickLine={false}
+                                        axisLine={false}
+                                    />
 
-                                    <Tooltip />
+                                    <Tooltip
+                                        formatter={(value) =>
+                                            `€${Number(value).toFixed(2)}`
+                                        }
+                                    />
 
                                     <Legend />
 
                                     <Bar
                                         dataKey="income"
                                         name="Income"
+                                        radius={[6, 6, 0, 0]}
                                     />
 
                                     <Bar
                                         dataKey="expenses"
                                         name="Expenses"
+                                        radius={[6, 6, 0, 0]}
                                     />
                                 </BarChart>
-                            )}
+                            </ResponsiveContainer>
                         </div>
+                    )}
+                </div>
 
-                    </div>
-
-                    <div className="dashboard-card">
-
-                        <h2>Recent Transactions</h2>
-
-                        {recentTransactions.length === 0 ? (
-                            <p>No transactions yet.</p>
-                        ) : (
-                            <ul className="transactions-list">
-
-                                {recentTransactions.map(
-                                    (transaction) => (
-                                        <li
-                                            className="transaction-item"
-                                            key={transaction.id}
-                                        >
-                                            <div className="transaction-info">
-                                                <strong>
-                                                    {transaction.category}
-                                                </strong>
-
-                                                <span>
-                                                    {transaction.description}
-                                                </span>
-                                            </div>
-
-                                            <span className="transaction-amount">
-                                                €{transaction.amount}
-                                            </span>
-                                        </li>
-                                    )
-                                )}
-
-                            </ul>
-                        )}
-
-                    </div>
-
-                </main>
             </div>
+
+            {/* Recent transactions */}
+            <div className="dashboard-card transactions-card">
+
+                <div className="card-header">
+                    <div>
+                        <p className="card-eyebrow">
+                            ACTIVITY
+                        </p>
+                        <h2>Recent Transactions</h2>
+                    </div>
+
+                    <a
+                        href="/transactions"
+                        className="view-all-link"
+                    >
+                        View all →
+                    </a>
+                </div>
+
+                {recentTransactions.length === 0 ? (
+                    <div className="empty-transactions">
+                        <div className="empty-icon">◎</div>
+                        <h3>No transactions yet</h3>
+                        <p>
+                            Add your first transaction to start
+                            tracking your finances.
+                        </p>
+
+                        <a
+                            href="/transactions"
+                            className="primary-button"
+                        >
+                            Add transaction
+                        </a>
+                    </div>
+                ) : (
+                    <div className="transaction-list">
+
+                        {recentTransactions.map((transaction) => (
+                            <div
+                                className="transaction-row"
+                                key={transaction.id}
+                            >
+
+                                <div className="transaction-left">
+
+                                    <div
+                                        className={`transaction-type-icon ${
+                                            transaction.type === "income"
+                                                ? "transaction-income"
+                                                : "transaction-expense"
+                                        }`}
+                                    >
+                                        {transaction.type === "income"
+                                            ? "↗"
+                                            : "↘"}
+                                    </div>
+
+                                    <div>
+                                        <h3>
+                                            {transaction.description ||
+                                                transaction.category ||
+                                                "Transaction"}
+                                        </h3>
+
+                                        <p>
+                                            {transaction.category ||
+                                                "Uncategorized"}
+                                            {" • "}
+                                            {new Date(
+                                                transaction.date
+                                            ).toLocaleDateString()}
+                                        </p>
+                                    </div>
+
+                                </div>
+
+                                <div
+                                    className={`transaction-amount ${
+                                        transaction.type === "income"
+                                            ? "amount-income"
+                                            : "amount-expense"
+                                    }`}
+                                >
+                                    {transaction.type === "income"
+                                        ? "+"
+                                        : "-"}
+                                    €{Number(transaction.amount).toFixed(2)}
+                                </div>
+
+                            </div>
+                        ))}
+
+                    </div>
+                )}
+
+            </div>
+
         </div>
     );
 }
