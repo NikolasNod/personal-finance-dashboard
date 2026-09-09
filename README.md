@@ -71,47 +71,6 @@ npm run dev
 
 Αν δεν είναι ανοικτός ο server της βάσης, ανοίξτε τον από το pgAdmin.
 
-## Project Structure
-
-Ήρθε η ώρα να αναλύσουμε την δομή του project.
-
-### /frontend
-
-Το frontend είναι δομημένο ως εξής:
-
-- `/frontend/src`: Όλα τα αρχεία κώδικα στα οποία βασίζεται το project
-- `/frontend/index.html`: Είναι το βασικό HTML entry point στο οποίο φορτώνεται η React εφαρμογή.
-- `/frontend/package.json`: Η περιγραφή του frontend από πλευράς βιβλιοθηκών και δομής (για το npm κυρίως)
-- `/frontend/vite.config.js`: Η configuration του Vite.
-
-#### /frontend/src
-
-Το src του frontend έχει ως εξής:
-
-- `/frontend/src/components`: Όλα τα React components
-- `/frontend/src/pages`: Όλες οι σελίδες
-- `/frontend/src/services`: Όλες οι υπηρεσίες (στη συγκεκριμένη περίπτωση μόνο το API handler)
-- `/frontend/src/App.jsx`: Η βασική δομή της εφαρμογής
-- `/frontend/src/index.css`: Όλο το βασικό styling
-- `/frontend/src/main.jsx`: Αυτό που τρέχει το `App.jsx`
-
-### /backend
-
-Ήρθε και η ώρα του backend:
-
-- `/backend/src`: Όλα τα απαραίτητα για να τρέχει το backend
-- `/backend/package.json`: Η περιγραφή του backend από πλευράς βιβλιοθηκών και δομής (για το npm κυρίως)
-
-#### /backend/src
-
-Το src του backend είναι πολύ απλό:
-
-- `/backend/src/db`: Ό,τι αφορά τη σύνδεση με τη βάση δεδομένων
-- `/backend/src/middleware`: Όλο το middleware, δηλαδή στη συγκεκριμένη περίπτωση authentication μέσω JWT και authorization μέσω ελέγχου ownership των δεδομένων
-- `/backend/src/routes`: Όλα τα routes και διαχείριση του API από πλευράς backend
-- `/backend/src/validators`: Οι κανόνες που εφαρμόζονται στα δεδομένα, δηλαδή το validation των τύπων
-- `/backend/src/server.js`: Είναι το entry point του backend και από εκεί γίνεται η αρχικοποίηση του Express server και των routes.
-
 ## Ανάλυση της Database
 
 Η βάση δεδομένων όπως έχει προαναφερθεί, χρησιμοποιεί την PostgreSQL. Ας αναλύσουμε όμως και τους πίνακες και τα δεδομένα που χρησιμοποιούν
