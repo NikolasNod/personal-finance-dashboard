@@ -32,7 +32,7 @@ const Transaction = {
 
     return result.rows[0] || null;
   },
-  async findByUserId({ userId }) {
+  async findByUserId(userId) {
     const result = await pool.query(
       `
         SELECT
@@ -52,6 +52,7 @@ const Transaction = {
         `,
       [userId],
     );
+    return result.rows;
   },
   async update({ setParts, values }) {
     const result = await pool.query(
@@ -77,7 +78,7 @@ const Transaction = {
       [transactionId, userId],
     );
 
-    return result.rows[0] || null;
+    return result || null;
   },
 };
 
