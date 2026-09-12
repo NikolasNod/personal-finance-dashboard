@@ -1,5 +1,7 @@
 const { registerSchema, loginSchema } = require("../validators/auth.validator");
 const User = require("../models/User");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 const authController = {
   async login(req, res) {
